@@ -1,0 +1,8 @@
+{
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "x-vapi-signature": "sha256=test_signature"
+  },
+  "body": "{\"message\":{\"type\":\"end-of-call-report\",\"summary\":\"Customer called to inquire about our services. They provided their contact information and expressed interest in scheduling a consultation. Call duration was 3 minutes.\",\"call\":{\"id\":\"official-test-1757625400\",\"customer\":{\"number\":\"+15551234567\",\"name\":\"Official Test\"},\"assistantId\":\"9dcdb98a-613c-4927-a007-8e3437ef337c\",\"assistantOverrides\":{\"variableValues\":{\"contactId\":\"jjYOawhhinftLJSQG3J2\",\"name\":\"Official Test\",\"email\":\"official.test@example.com\"}},\"transcript\":\"This is a test call with the official VAPI webhook structure including summary.\",\"recordingUrl\":\"https://storage.vapi.ai/official-test-audio-5f109e3d-ac95-4237-aa54-02ae92ecacd6-1757625400987-3fb51a52-9654-4d5e-bf60-436205fa8ab3-mono.mp3\",\"analysis\":{\"structuredData\":{\"firstName\":\"Official\",\"lastName\":\"Test\",\"email\":\"official.test@example.com\",\"phone\":\"+15551234567\",\"interest\":\"consultation\"}},\"startedAt\":\"2025-09-11T21:20:00.000Z\",\"endedAt\":\"2025-09-11T21:23:00.000Z\",\"status\":\"ended\",\"endedReason\":\"customer-ended-call\"},\"timestamp\":\"2025-09-11T21:23:00.000Z\"}}"
+}

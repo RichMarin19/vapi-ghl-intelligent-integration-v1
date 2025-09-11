@@ -1,0 +1,8 @@
+{
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "x-vapi-signature": "sha256=test_signature"
+  },
+  "body": "{\"message\":{\"type\":\"end-of-call-report\",\"call\":{\"id\":\"deployment-test-1757624746\",\"customer\":{\"number\":\"+15551234567\",\"name\":\"Audio Test\"},\"assistantId\":\"9dcdb98a-613c-4927-a007-8e3437ef337c\",\"assistantOverrides\":{\"variableValues\":{\"contactId\":\"jjYOawhhinftLJSQG3J2\",\"name\":\"Audio Test\",\"email\":\"test.audio@example.com\"}},\"transcript\":\"This is a test call to verify audio URL extraction is working properly.\",\"recordingUrl\":\"https://storage.vapi.ai/5f109e3d-ac95-4237-aa54-02ae92ecacd6-1757624746987-3fb51a52-9654-4d5e-bf60-436205fa8ab3-mono.mp3\",\"analysis\":{\"structuredData\":{\"firstName\":\"Audio\",\"lastName\":\"Test\",\"email\":\"test.audio@example.com\",\"phone\":\"+15551234567\",\"testType\":\"audio\"}},\"startedAt\":\"2025-09-11T21:05:46.000Z\",\"endedAt\":\"2025-09-11T21:08:46.000Z\",\"status\":\"ended\",\"endedReason\":\"customer-ended-call\"},\"timestamp\":\"2025-09-11T21:08:46.000Z\"}}"
+}

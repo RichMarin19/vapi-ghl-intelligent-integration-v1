@@ -1,0 +1,55 @@
+{
+  "message": {
+    "type": "end-of-call-report",
+    "call": {
+      "id": "test-call-live-contact",
+      "customer": {
+        "number": "+15551234567",
+        "name": "Jack Melo"
+      },
+      "assistantId": "9dcdb98a-613c-4927-a007-8e3437ef337c",
+      "phoneNumberId": "480686f7-a658-42d7-a3d2-eef8860c6768",
+      "assistantOverrides": {
+        "variableValues": {
+          "contactId": "2QNmYuIhedvCwIwv7MoQ",
+          "name": "Jack Melo",
+          "email": "jack.melo@example.com",
+          "phone": "+15551234567",
+          "time": "2025-09-12",
+          "address": "456 Oak Street, Miami, FL 33101"
+        }
+      },
+      "transcript": "Hello, this is Jack Melo and my email is jack.melo@example.com. I live at 456 Oak Street in Miami, Florida 33101. I work for Melo Real Estate Group. I'm motivated to sell my property because I want to save on commission fees and avoid high realtor costs. I'm asking $525,000 for my home. I need to sell within the next 2-4 months because I'm relocating to California for a new business opportunity. My biggest frustration has been dealing with agents who don't communicate well. I had a bad experience with my last agent who was always late and unprofessional. I'm concerned about getting the right price and finding serious buyers. I'm definitely open to working with a professional agent if they can show me they're different. I'd like to schedule an appointment for this Friday, September 12th at 12:00 PM to discuss my listing options.",
+      "analysis": {
+        "structuredData": {
+          "firstName": "Jack",
+          "lastName": "Melo", 
+          "email": "jack.melo@example.com",
+          "companyName": "Melo Real Estate Group",
+          "address1": "456 Oak Street",
+          "city": "Miami",
+          "state": "FL",
+          "postalCode": "33101",
+          "phone": "+15551234567",
+          "selling_motivation": "Save Commission",
+          "asking_price": "$525,000",
+          "sell_timeline": "2-4 months",
+          "relocation_destination": "California",
+          "agent_openness": "Open to professional agent",
+          "fsbo_challenges": "Getting right price, finding serious buyers",
+          "last_agent_experience": "Late and unprofessional agent",
+          "appointment_requested": true,
+          "appointment_date": "2025-09-12",
+          "appointment_time": "12:00 PM",
+          "appointment_type": "listing_consultation"
+        }
+      },
+      "startedAt": "2025-09-10T14:00:00.000Z",
+      "endedAt": "2025-09-10T14:18:45.000Z",
+      "status": "ended",
+      "endedReason": "customer-ended-call"
+    },
+    "phoneNumber": "+15551234567",
+    "timestamp": "2025-09-10T14:18:48.000Z"
+  }
+}

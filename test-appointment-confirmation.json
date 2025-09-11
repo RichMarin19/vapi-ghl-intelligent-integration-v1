@@ -1,0 +1,8 @@
+{
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "x-vapi-signature": "sha256=test_signature"
+  },
+  "body": "{\"message\":{\"type\":\"end-of-call-report\",\"summary\":\"Customer called requesting an appointment. I've scheduled them for tomorrow at 2pm. They confirmed availability and provided their contact information.\",\"call\":{\"id\":\"smart-test-1757625401\",\"customer\":{\"number\":\"+15551234568\",\"name\":\"Smart Test\"},\"assistantId\":\"9dcdb98a-613c-4927-a007-8e3437ef337c\",\"assistantOverrides\":{\"variableValues\":{\"contactId\":\"jjYOawhhinftLJSQG3J2\",\"name\":\"Smart Test\",\"email\":\"smart.test@example.com\"}},\"transcript\":\"Hi, I'd like to schedule an appointment for tomorrow at 2pm if possible. Assistant: Perfect! I've scheduled you for tomorrow at 2pm. You're all set for your consultation tomorrow at 2 o'clock.\",\"recordingUrl\":\"https://storage.vapi.ai/smart-test-audio.mp3\",\"analysis\":{\"structuredData\":{\"firstName\":\"Smart\",\"lastName\":\"Test\",\"email\":\"smart.test@example.com\",\"phone\":\"+15551234568\",\"preferredTime\":\"2pm\",\"appointmentRequested\":true}},\"startedAt\":\"2025-09-11T21:20:00.000Z\",\"endedAt\":\"2025-09-11T21:23:00.000Z\",\"status\":\"ended\",\"endedReason\":\"customer-ended-call\"},\"timestamp\":\"2025-09-11T21:23:00.000Z\"}}"
+}

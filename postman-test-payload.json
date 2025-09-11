@@ -1,0 +1,55 @@
+{
+  "message": {
+    "type": "end-of-call-report",
+    "call": {
+      "id": "test-call-12345",
+      "customer": {
+        "number": "+15551234567",
+        "name": "John Smith"
+      },
+      "assistantId": "9dcdb98a-613c-4927-a007-8e3437ef337c",
+      "phoneNumberId": "480686f7-a658-42d7-a3d2-eef8860c6768",
+      "assistantOverrides": {
+        "variableValues": {
+          "contactId": "test-contact-123",
+          "name": "John Smith",
+          "email": "john.smith@example.com",
+          "phone": "+15551234567",
+          "time": "2025-09-10",
+          "address": "123 Main St, Anytown, NY 12345"
+        }
+      },
+      "transcript": "Hello, I'm calling about your property listing. My name is John Smith and my email is john.smith@example.com. I live at 123 Main St in Anytown, NY. I work for ABC Real Estate Company. I'm motivated to sell because I want to save on commission fees and avoid realtor costs. I'm asking $450,000 for my property. I need to sell within the next 3-6 months because I'm relocating to Florida for a new job opportunity. My biggest disappointment has been dealing with unresponsive agents in the past. I had a terrible experience with my last agent who never returned calls and missed appointments. I'm concerned about pricing my home correctly and getting qualified buyers. I'm open to working with an agent again if they can prove they're different. I'd like to schedule an appointment for next Tuesday at 2:00 PM to discuss listing my property.",
+      "analysis": {
+        "structuredData": {
+          "firstName": "John",
+          "lastName": "Smith", 
+          "email": "john.smith@example.com",
+          "companyName": "ABC Real Estate Company",
+          "address1": "123 Main St",
+          "city": "Anytown",
+          "state": "NY",
+          "postalCode": "12345",
+          "phone": "+15551234567",
+          "selling_motivation": "Save Commission",
+          "asking_price": "$450,000",
+          "sell_timeline": "3-6 months",
+          "relocation_destination": "Florida",
+          "agent_openness": "Open to re-listing with right agent",
+          "fsbo_challenges": "Pricing concerns, finding qualified buyers",
+          "last_agent_experience": "Unresponsive agent, missed appointments",
+          "appointment_requested": true,
+          "appointment_date": "2025-09-17",
+          "appointment_time": "2:00 PM",
+          "appointment_type": "listing_consultation"
+        }
+      },
+      "startedAt": "2025-09-10T10:00:00.000Z",
+      "endedAt": "2025-09-10T10:15:32.000Z",
+      "status": "ended",
+      "endedReason": "customer-ended-call"
+    },
+    "phoneNumber": "+15551234567",
+    "timestamp": "2025-09-10T10:15:35.000Z"
+  }
+}

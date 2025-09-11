@@ -1,0 +1,8 @@
+{
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "x-vapi-signature": "sha256=test_signature"
+  },
+  "body": "{\"message\":{\"type\":\"end-of-call-report\",\"call\":{\"id\":\"deployment-test-1757622956\",\"customer\":{\"number\":\"+15551234567\",\"name\":\"Deployment Test\"},\"assistantId\":\"9dcdb98a-613c-4927-a007-8e3437ef337c\",\"assistantOverrides\":{\"variableValues\":{\"contactId\":\"jjYOawhhinftLJSQG3J2\",\"name\":\"Test Deployment\",\"email\":\"test.deployment@example.com\"}},\"transcript\":\"This is a test to verify the deployment is working with PIT token authentication.\",\"analysis\":{\"structuredData\":{\"firstName\":\"Test\",\"lastName\":\"Deployment\",\"email\":\"test.deployment@example.com\",\"phone\":\"+15551234567\",\"testType\":\"deployment\"}},\"startedAt\":\"2025-09-11T20:32:56.000Z\",\"endedAt\":\"2025-09-11T20:35:56.000Z\",\"status\":\"ended\",\"endedReason\":\"customer-ended-call\"},\"timestamp\":\"2025-09-11T20:35:56.000Z\"}}"
+}
