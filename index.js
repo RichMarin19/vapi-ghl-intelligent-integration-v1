@@ -7,6 +7,8 @@ import { SSMClient, GetParameterCommand, PutParameterCommand } from '@aws-sdk/cl
 import * as NoteManager from './note-manager.js';
 import { PITTokenManager } from './pit-token-manager.js';
 import { processAppointmentRequest } from './appointment-manager.js';
+import { CustomFieldsManager } from './custom-fields-manager.js';
+import { vapiFunctions } from './vapi-functions.js';
 
 // Environment variables
 const GHL_CLIENT_ID = process.env.GHL_CLIENT_ID;
@@ -43,6 +45,9 @@ const oauth2Config = {
 
 // Global PIT token manager instance
 const pitTokenManager = new PITTokenManager();
+
+// Global Custom Fields Manager instance - FORCE UPDATE 2025-09-12
+const customFieldsManager = new CustomFieldsManager();
 
 // Function to get parameter from Parameter Store
 async function getParameter(paramName, decrypt = true) {
@@ -234,9 +239,96 @@ export async function handler(event) {
             payload = event.body || event;
         }
         
+        // Handle VAPI function calls (real-time during conversation)
+        if (payload.message?.type === 'function-call' || event.httpMethod === 'POST' && event.path?.includes('/vapi-function/')) {
+            console.log('🔧 Processing VAPI function call...');
+            
+            const functionName = payload.message?.function?.name || event.pathParameters?.functionName;
+            const functionArgs = payload.message?.function?.parameters || payload.parameters || {};
+            
+            console.log(`📞 Function call: ${functionName}`, functionArgs);
+            
+            // Route to appropriate function
+            if (vapiFunctions[functionName]) {
+                try {
+                    const result = await vapiFunctions[functionName](functionArgs);
+                    console.log('✅ Function call result:', result);
+                    
+                    return {
+                        statusCode: 200,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                            'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-vapi-signature'
+                        },
+                        body: JSON.stringify(result)
+                    };
+                } catch (error) {
+                    console.error('❌ Function call error:', error.message);
+                    return {
+                        statusCode: 500,
+                        body: JSON.stringify({
+                            success: false,
+                            error: error.message,
+                            message: "Function call failed"
+                        })
+                    };
+                }
+            } else {
+                console.error('❌ Unknown function:', functionName);
+                return {
+                    statusCode: 404,
+                    body: JSON.stringify({
+                        success: false,
+                        error: `Function ${functionName} not found`,
+                        availableFunctions: Object.keys(vapiFunctions)
+                    })
+                };
+            }
+        }
+
         // Handle VAPI end-of-call reports
         if (payload.message?.type === 'end-of-call-report') {
             console.log('Processing VAPI end-of-call report...');
+            
+            // DEBUG: Log detailed payload structure for custom fields troubleshooting
+            console.log('🔍 LIVE WEBHOOK DEBUG - Payload Structure:');
+            console.log('📦 Raw Event Body Type:', typeof event.body);
+            console.log('📦 Raw Event Keys:', Object.keys(event));
+            console.log('📦 Payload Keys:', Object.keys(payload));
+            console.log('📦 Message Keys:', payload.message ? Object.keys(payload.message) : 'NO MESSAGE');
+            console.log('📦 Call Keys:', payload.message?.call ? Object.keys(payload.message.call) : 'NO CALL');
+            
+            // DEBUG: Check transcript locations
+            console.log('🎯 TRANSCRIPT LOCATION DEBUG:');
+            console.log('   message.call.transcript:', !!payload.message?.call?.transcript, payload.message?.call?.transcript?.length || 0, 'chars');
+            console.log('   call.transcript:', !!payload.call?.transcript, payload.call?.transcript?.length || 0, 'chars');
+            console.log('   message.call.analysis.transcript:', !!payload.message?.call?.analysis?.transcript, payload.message?.call?.analysis?.transcript?.length || 0, 'chars');
+            
+            // DEBUG: Check structured data locations  
+            console.log('🧠 STRUCTURED DATA DEBUG:');
+            console.log('   message.call.analysis:', !!payload.message?.call?.analysis);
+            console.log('   message.call.analysis.structuredData:', !!payload.message?.call?.analysis?.structuredData);
+            console.log('   message.analysis:', !!payload.message?.analysis);
+            console.log('   message.analysis.structuredData:', !!payload.message?.analysis?.structuredData);
+            
+            // DEBUG: Log first 200 chars of any found transcript
+            const possibleTranscripts = [
+                payload.message?.call?.transcript,
+                payload.call?.transcript,
+                payload.message?.call?.analysis?.transcript,
+                payload.message?.transcript
+            ].filter(t => t && typeof t === 'string' && t.length > 0);
+            
+            if (possibleTranscripts.length > 0) {
+                console.log('📝 FOUND TRANSCRIPTS:');
+                possibleTranscripts.forEach((transcript, index) => {
+                    console.log(`   Transcript ${index + 1}: "${transcript.substring(0, 200)}..."`);
+                });
+            } else {
+                console.log('❌ NO TRANSCRIPTS FOUND IN PAYLOAD');
+            };
             
             const callData = payload.message;
             const call = callData.call;
@@ -317,6 +409,64 @@ export async function handler(event) {
                 console.log('Contact updated successfully');
             }
             
+            // Process custom fields using AI extraction from transcript
+            let customFieldsResult = null;
+            try {
+                console.log('🤖 Processing custom fields with AI transcript analysis...');
+                console.log('🔧 DEBUG: Custom Fields Manager Initialization Check');
+                console.log('   Manager initialized:', !!customFieldsManager);
+                console.log('   PIT Token loaded:', !!customFieldsManager.pitTokenManager?.pitToken);
+                console.log('   Field mappings loaded:', !!customFieldsManager.customFieldMappings);
+                
+                // Ensure custom fields manager is properly initialized for live calls
+                if (!customFieldsManager.customFieldMappings) {
+                    console.log('⚠️ Custom fields manager not initialized, initializing now...');
+                    const initialized = await customFieldsManager.initialize();
+                    if (!initialized) {
+                        throw new Error('Failed to initialize custom fields manager during live call');
+                    }
+                    console.log('✅ Custom fields manager initialized during live call processing');
+                }
+                
+                // Create call data structure for custom fields processing
+                const callDataForCustomFields = {
+                    message: payload.message,
+                    call: call
+                };
+                
+                console.log('📦 DEBUG: Call Data for Custom Fields:');
+                console.log('   Has message:', !!callDataForCustomFields.message);
+                console.log('   Has call:', !!callDataForCustomFields.call);
+                console.log('   Call ID:', callDataForCustomFields.call?.id);
+                console.log('   Message type:', callDataForCustomFields.message?.type);
+                console.log('   Call keys:', callDataForCustomFields.call ? Object.keys(callDataForCustomFields.call) : 'none');
+                
+                customFieldsResult = await customFieldsManager.processVAPICall(callDataForCustomFields, contactId);
+                
+                if (customFieldsResult.success) {
+                    console.log(`✅ Custom fields updated: ${customFieldsResult.fieldsUpdated} fields processed`);
+                    if (customFieldsResult.updatedFields && customFieldsResult.updatedFields.length > 0) {
+                        console.log('📊 Updated fields:');
+                        customFieldsResult.updatedFields.forEach(field => {
+                            console.log(`   • ${field.fieldName}: "${field.value}" (${field.confidence}% confidence)`);
+                        });
+                    }
+                    if (customFieldsResult.warnings && customFieldsResult.warnings.length > 0) {
+                        console.log('⚠️ Custom fields warnings:');
+                        customFieldsResult.warnings.forEach(warning => console.log(`   • ${warning}`));
+                    }
+                } else {
+                    console.log(`⚠️ Custom fields processing failed: ${customFieldsResult.message}`);
+                }
+            } catch (customFieldsError) {
+                console.error('❌ Custom fields processing error:', customFieldsError.message);
+                customFieldsResult = {
+                    success: false,
+                    message: customFieldsError.message,
+                    fieldsUpdated: 0
+                };
+            }
+            
             // Create call summary note using modular system
             let noteResult = null;
             if (validation.isValid) {
@@ -388,7 +538,9 @@ Generated by VAPI-GHL Integration`;
                     contactId: contactId,
                     noteCreated: !!noteResult?.note?.id,
                     appointmentProcessed: appointmentResult?.processed || false,
-                    appointmentCreated: appointmentResult?.success || false
+                    appointmentCreated: appointmentResult?.success || false,
+                    customFieldsUpdated: customFieldsResult?.fieldsUpdated || 0,
+                    customFieldsSuccess: customFieldsResult?.success || false
                 })
             };
         }
