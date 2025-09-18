@@ -1,6 +1,4 @@
 import axios from 'axios';
-import { AuthorizationCode } from 'simple-oauth2';
-import jwt from 'jsonwebtoken';
 import { SSMClient, GetParameterCommand, PutParameterCommand } from '@aws-sdk/client-ssm';
 
 // Import modular components
@@ -11,8 +9,6 @@ import { CustomFieldsManager } from './custom-fields-manager.js';
 import { vapiFunctions } from './vapi-functions.js';
 
 // Environment variables
-const GHL_CLIENT_ID = process.env.GHL_CLIENT_ID;
-const GHL_CLIENT_SECRET = process.env.GHL_CLIENT_SECRET;
 const GHL_LOCATION_ID = process.env.GHL_LOCATION_ID;
 const VAPI_SECRET_TOKEN = process.env.VAPI_SECRET_TOKEN;
 const VAPI_API_KEY = process.env.VAPI_API_KEY;
@@ -26,22 +22,6 @@ const VAPI_API_BASE_URL = 'https://api.vapi.ai';
 // AWS SSM client for Parameter Store
 const ssmClient = new SSMClient({ region: 'us-east-2' });
 
-// Parameter Store paths
-const ACCESS_TOKEN_PARAM = '/vapi-ghl-integration/ghl-access-token';
-const REFRESH_TOKEN_PARAM = '/vapi-ghl-integration/ghl-refresh-token';
-
-// OAuth2 configuration for GHL
-const oauth2Config = {
-    client: {
-        id: GHL_CLIENT_ID,
-        secret: GHL_CLIENT_SECRET
-    },
-    auth: {
-        tokenHost: 'https://marketplace.gohighlevel.com',
-        tokenPath: '/oauth/token',
-        authorizePath: '/oauth/authorize'
-    }
-};
 
 // Global PIT token manager instance
 const pitTokenManager = new PITTokenManager();

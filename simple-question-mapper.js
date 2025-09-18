@@ -163,37 +163,65 @@ export class SimpleQuestionMapper {
         const summaryLower = summary.toLowerCase();
 
         // Direct extraction based on summary content
-        // Motivation: Look for selling reasons
-        if (summaryLower.includes('to move to')) {
+        // Motivation: Look for selling reasons with broader patterns (priority order matters)
+        if (summaryLower.includes('frustrated') && (summaryLower.includes('agent') || summaryLower.includes('calls'))) {
             extractedFields.motivation = {
-                value: 'Relocation',
-                confidence: 85,
+                value: 'Frustrated by agent calls',
+                confidence: 90,
                 source: 'direct_extraction'
             };
-        } else if (summaryLower.includes('commission') && summaryLower.includes('money')) {
-            extractedFields.motivation = {
-                value: 'Save commission, get the most money',
-                confidence: 85,
-                source: 'direct_extraction'
-            };
-        } else if (summaryLower.includes('save commission') || summaryLower.includes('saving commission')) {
+        } else if (summaryLower.includes('save commission') || summaryLower.includes('saving commission') || summaryLower.includes('avoid commission') || (summaryLower.includes('commission') && (summaryLower.includes('save') || summaryLower.includes('avoid')))) {
             extractedFields.motivation = {
                 value: 'Save commission',
                 confidence: 85,
                 source: 'direct_extraction'
             };
+        } else if (summaryLower.includes('to move to') || summaryLower.includes('moving to') || summaryLower.includes('relocat')) {
+            extractedFields.motivation = {
+                value: 'Relocation',
+                confidence: 85,
+                source: 'direct_extraction'
+            };
+        } else if (summaryLower.includes('get the most money') || summaryLower.includes('maximize') || summaryLower.includes('most money')) {
+            extractedFields.motivation = {
+                value: 'Get the most money',
+                confidence: 85,
+                source: 'direct_extraction'
+            };
+        } else if (summaryLower.includes('sell') && (summaryLower.includes('quickly') || summaryLower.includes('fast') || summaryLower.includes('soon'))) {
+            extractedFields.motivation = {
+                value: 'Quick sale',
+                confidence: 80,
+                source: 'direct_extraction'
+            };
         }
 
-        // Expectations: Look for price or process expectations
-        const priceMatch = summary.match(/\$?([\d,]+\.?\d*)\s*(?:million|mil|M)/i);
-        if (priceMatch) {
-            const amount = priceMatch[1];
+        // Expectations: Look for price or process expectations with broader patterns
+        const millionMatch = summary.match(/\$?([\d,]+\.?\d*)\s*(?:million|mil|M)/i);
+        const thousandMatch = summary.match(/\$?([\d,]+)(?:,000|k)/i);
+        const dollarMatch = summary.match(/\$[\d,]+(?:\.\d{2})?(?!\s*(?:million|mil|M|k|thousand))/i);
+        
+        if (millionMatch) {
+            const amount = millionMatch[1];
             extractedFields.expectations = {
                 value: `$${amount}M`,
                 confidence: 90,
                 source: 'direct_extraction'
             };
-        } else if (summaryLower.includes('most money')) {
+        } else if (thousandMatch) {
+            const amount = thousandMatch[1];
+            extractedFields.expectations = {
+                value: `$${amount}K`,
+                confidence: 90,
+                source: 'direct_extraction'
+            };
+        } else if (dollarMatch) {
+            extractedFields.expectations = {
+                value: dollarMatch[0],
+                confidence: 90,
+                source: 'direct_extraction'
+            };
+        } else if (summaryLower.includes('most money') || summaryLower.includes('maximize')) {
             extractedFields.expectations = {
                 value: 'Get the most money possible',
                 confidence: 85,
@@ -217,42 +245,115 @@ export class SimpleQuestionMapper {
             };
         }
 
-        // Next Destination: Look for location references
-        const locationMatch = summary.match(/(?:to move to|moving to)\s+([A-Za-z\s]+?)(?:,|\.|$)/i);
-        if (locationMatch) {
+        // Next Destination: Look for location references with broader patterns
+        const moveToMatch = summary.match(/(?:to move to|moving to|relocat(?:ing)? to)\s+([A-Za-z\s]+?)(?:,|\.|$)/i);
+        const stateMatch = summary.match(/(?:in|to)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s*(?:for|because|due)/i);
+        const cityStateMatch = summary.match(/(?:in|to)\s+([A-Z][a-z]+,?\s+[A-Z]{2})\b/i);
+        
+        if (moveToMatch) {
             extractedFields.nextDestination = {
-                value: locationMatch[1].trim(),
+                value: moveToMatch[1].trim(),
                 confidence: 90,
+                source: 'direct_extraction'
+            };
+        } else if (cityStateMatch) {
+            extractedFields.nextDestination = {
+                value: cityStateMatch[1].trim(),
+                confidence: 85,
+                source: 'direct_extraction'
+            };
+        } else if (stateMatch) {
+            extractedFields.nextDestination = {
+                value: stateMatch[1].trim(),
+                confidence: 80,
                 source: 'direct_extraction'
             };
         }
 
-        // Disappointments: Look for frustration or disappointment mentions
-        if (summaryLower.includes('frustrated by agent calls')) {
+        // Disappointments: Look for frustration or disappointment mentions with broader patterns
+        if (summaryLower.includes('frustrated') && (summaryLower.includes('agent') || summaryLower.includes('calls'))) {
             extractedFields.disappointments = {
                 value: 'Agent calls',
                 confidence: 90,
                 source: 'direct_extraction'
             };
-        } else if (summaryLower.includes('concerns about buyer quality')) {
+        } else if (summaryLower.includes('frustrated') || summaryLower.includes('disappointing') || summaryLower.includes('disappointed')) {
+            if (summaryLower.includes('agent') || summaryLower.includes('realtor')) {
+                extractedFields.disappointments = {
+                    value: 'Agent experience',
+                    confidence: 90,
+                    source: 'direct_extraction'
+                };
+            } else if (summaryLower.includes('buyer') || summaryLower.includes('quality')) {
+                extractedFields.disappointments = {
+                    value: 'Buyer quality',
+                    confidence: 90,
+                    source: 'direct_extraction'
+                };
+            } else if (summaryLower.includes('process') || summaryLower.includes('selling')) {
+                extractedFields.disappointments = {
+                    value: 'Selling process',
+                    confidence: 85,
+                    source: 'direct_extraction'
+                };
+            }
+        } else if (summaryLower.includes('bad experience') || summaryLower.includes('poor experience')) {
             extractedFields.disappointments = {
-                value: 'Quality of buyers',
-                confidence: 90,
+                value: 'Previous experience',
+                confidence: 85,
+                source: 'direct_extraction'
+            };
+        } else if (summaryLower.includes('challenge') || summaryLower.includes('difficult') || summaryLower.includes('problem')) {
+            extractedFields.disappointments = {
+                value: 'Process challenges',
+                confidence: 80,
                 source: 'direct_extraction'
             };
         }
 
-        // Concerns: Look for concern mentions
-        if (summaryLower.includes('concerns about buyer quality')) {
-            extractedFields.concerns = {
-                value: 'Buyer quality',
-                confidence: 90,
-                source: 'direct_extraction'
-            };
-        } else if (summaryLower.includes('frustrated by agent calls')) {
+        // Concerns: Look for concern mentions with broader patterns
+        if (summaryLower.includes('frustrated') && (summaryLower.includes('agent') || summaryLower.includes('calls'))) {
             extractedFields.concerns = {
                 value: 'Agent calls',
                 confidence: 90,
+                source: 'direct_extraction'
+            };
+        } else if (summaryLower.includes('concern') || summaryLower.includes('worried') || summaryLower.includes('worry')) {
+            if (summaryLower.includes('buyer') || summaryLower.includes('quality')) {
+                extractedFields.concerns = {
+                    value: 'Buyer quality',
+                    confidence: 90,
+                    source: 'direct_extraction'
+                };
+            } else if (summaryLower.includes('price') || summaryLower.includes('pricing')) {
+                extractedFields.concerns = {
+                    value: 'Pricing',
+                    confidence: 90,
+                    source: 'direct_extraction'
+                };
+            } else if (summaryLower.includes('timing') || summaryLower.includes('time')) {
+                extractedFields.concerns = {
+                    value: 'Timing',
+                    confidence: 85,
+                    source: 'direct_extraction'
+                };
+            } else if (summaryLower.includes('market') || summaryLower.includes('selling')) {
+                extractedFields.concerns = {
+                    value: 'Market conditions',
+                    confidence: 85,
+                    source: 'direct_extraction'
+                };
+            }
+        } else if (summaryLower.includes('unsure') || summaryLower.includes('uncertain')) {
+            extractedFields.concerns = {
+                value: 'Uncertainty',
+                confidence: 80,
+                source: 'direct_extraction'
+            };
+        } else if (summaryLower.includes('agent') && (summaryLower.includes('frustrated') || summaryLower.includes('calls'))) {
+            extractedFields.concerns = {
+                value: 'Agent interactions',
+                confidence: 85,
                 source: 'direct_extraction'
             };
         }
